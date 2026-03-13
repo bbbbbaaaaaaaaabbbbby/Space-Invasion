@@ -21,6 +21,7 @@ public class Shoot : MonoBehaviour
 
     private void Shot()
     {
-        GameObject rocket = Instantiate(rocketPrefab, firePoint.position, Quaternion.identity);
+        Quaternion rot = Quaternion.Euler(transform.rotation.eulerAngles.z, transform.rotation.eulerAngles.y + 90f, transform.rotation.eulerAngles.x);
+        GameObject rocket = Instantiate(rocketPrefab, firePoint.position, rot);
     }
 }

@@ -51,5 +51,10 @@ public class Movement : MonoBehaviour
         rb.MoveRotation(Quaternion.Euler(euler));
         
         rb.linearVelocity = rb.transform.forward * speed;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Time.timeScale = 0;
+        }
     }
 }
