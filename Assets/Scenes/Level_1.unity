@@ -358,7 +358,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Shoot
   rocketPrefab: {fileID: 6696654689485054994, guid: 9d76434649b0b0843ba6be2d07bfe495, type: 3}
-  firePoint: {fileID: 1740442310}
+  firePoint: {fileID: 1079442000}
+  firePoint2: {fileID: 1740442310}
+--- !u!114 &373643569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 373643564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 622511f4714e5334fa22326512771446, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Savings
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -754,7 +767,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
       insertIndex: -1
       addedObject: {fileID: 373643568}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 373643569}
   m_SourcePrefab: {fileID: 100100000, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
+--- !u!4 &1079442000 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4989900093969389750, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
+  m_PrefabInstance: {fileID: 1000995306}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1160336590
 PrefabInstance:
   m_ObjectHideFlags: 0

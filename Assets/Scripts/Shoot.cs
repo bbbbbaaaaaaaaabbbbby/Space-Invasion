@@ -5,6 +5,7 @@ public class Shoot : MonoBehaviour
 {
     public GameObject rocketPrefab;
     public Transform firePoint;
+    public Transform firePoint2;
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -23,5 +24,6 @@ public class Shoot : MonoBehaviour
     {
         Quaternion rot = Quaternion.Euler(transform.rotation.eulerAngles.z, transform.rotation.eulerAngles.y + 90f, transform.rotation.eulerAngles.x);
         GameObject rocket = Instantiate(rocketPrefab, firePoint.position, rot);
+        GameObject rocket2 = Instantiate(rocketPrefab, firePoint2.position, rot);
     }
 }
