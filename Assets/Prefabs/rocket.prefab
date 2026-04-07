@@ -84,6 +84,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: rocket
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 09de90248f24a4d4e978a358f1f1cfe6, type: 3}
+      propertyPath: m_TagString
+      value: Rocket
+      objectReference: {fileID: 0}
     - target: {fileID: 7597896510942086334, guid: 09de90248f24a4d4e978a358f1f1cfe6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -95,6 +99,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 09de90248f24a4d4e978a358f1f1cfe6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4961810946435678160}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 09de90248f24a4d4e978a358f1f1cfe6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8403396551005873811}
     - targetCorrespondingSourceObject: {fileID: 4953458306312398887, guid: 09de90248f24a4d4e978a358f1f1cfe6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6567867235069119968}
@@ -190,4 +197,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ef43a09fa3b8ce4e843a46bb2497e92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RocketsFlying
-  speed: 30
+--- !u!114 &8403396551005873811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6696654689485054994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f2545d2e1a99b54cade5d387ace76c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RocketStats
+  damage: 50
+  speed: 50

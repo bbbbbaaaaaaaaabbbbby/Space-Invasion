@@ -7,14 +7,14 @@ public class Spawning : MonoBehaviour
     public GameObject prefab;
     public GameObject[] spawnPoints;
     private GameObject spawned;
-    private float rndValue;
+    private int rndValue;
     void Start()
     {
         spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
         for (int i = 0; i < spawnPoints.Length; i++)
         {
             Debug.Log(spawnPoints[i].name);
-            rndValue = (float)(rnd.Next(100, 10000) / 1000);
+            rndValue = rnd.Next(1, 11);
             Debug.Log(rndValue);
             spawned = Instantiate(prefab, spawnPoints[i].transform.position, Quaternion.identity);
             Debug.Log(spawned.name);

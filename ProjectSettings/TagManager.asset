@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Colliding
   - SpawnPoint
+  - Rocket
   layers:
   - Default
   - TransparentFX
