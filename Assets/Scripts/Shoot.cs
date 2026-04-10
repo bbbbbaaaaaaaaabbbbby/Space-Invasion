@@ -6,9 +6,10 @@ public class Shoot : MonoBehaviour
     public GameObject rocketPrefab;
     public Transform firePoint;
     public Transform firePoint2;
+    private bool CanFire = true;
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) &&  CanFire)
         {
             StartCoroutine(ShootCoroutine());
         }
@@ -16,8 +17,10 @@ public class Shoot : MonoBehaviour
 
     IEnumerator ShootCoroutine()
     {
+        CanFire = false;
         Shot();
         yield return new WaitForSeconds(5f);
+        CanFire = true;
     }
 
     private void Shot()
