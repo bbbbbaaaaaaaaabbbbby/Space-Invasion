@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlanetLiving : MonoBehaviour
 { 
     public int _hp = 100;
+    public GameObject boomPrefab;
 
     private void Awake()
     {
@@ -22,6 +23,10 @@ public class PlanetLiving : MonoBehaviour
     {
         Debug.Log(collision.gameObject.name);
         Debug.Log(collision.gameObject.tag);
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Destroy(collision.gameObject);
+        }
         if (collision.gameObject.CompareTag("Rocket"))
         {
             Debug.Log(_hp);

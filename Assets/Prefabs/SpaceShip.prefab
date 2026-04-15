@@ -236,6 +236,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SpaceShip
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 5362252545098837182, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
