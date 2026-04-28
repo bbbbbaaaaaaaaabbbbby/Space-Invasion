@@ -14,8 +14,9 @@ public class Boom : MonoBehaviour
             explosionEffect = Instantiate(explosionPref,  transform.position, transform.rotation);
             // int hp = collision.gameObject.GetComponent<PlanetLiving>()._hp;
             // hp -= GetComponent<RocketStats>().damage;
+            Destroy(explosionEffect, lifetime);
+            Destroy(transform.parent.gameObject);
         }
-        Destroy(explosionEffect, lifetime);
-        Destroy(transform.parent.gameObject);
+        
     }
 }

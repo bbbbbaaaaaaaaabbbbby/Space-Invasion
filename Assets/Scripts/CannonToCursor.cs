@@ -7,7 +7,7 @@ public class CannonToCursor : MonoBehaviour
 
     private void Start()
     {
-        _cam = Camera.main;
+        _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
     }
     
     

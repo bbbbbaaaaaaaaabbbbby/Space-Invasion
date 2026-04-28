@@ -45,11 +45,11 @@ public class NetMan : NetworkManager
         playerConnected = true;
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Mouse0) && !playerSpawned && playerConnected)
-        {
-            ActivatePlayerSpawn();
-        }
-    }
+    // private void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Mouse0) && !playerSpawned && playerConnected)
+    //     {
+    //         ActivatePlayerSpawn();
+    //     }
+    // }
 }

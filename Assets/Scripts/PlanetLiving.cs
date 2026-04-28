@@ -4,19 +4,12 @@ public class PlanetLiving : MonoBehaviour
 { 
     public int _hp = 100;
     public GameObject boomPrefab;
+    private int _value;
 
     private void Awake()
     {
-        _hp = (int)(transform.localScale.x) * 8;
-    }
-
-    private void Update()
-    {
-        // Debug.Log(_hp);
-        if (_hp <= 0)
-        {
-            Destroy(gameObject.transform.parent.gameObject);
-        }
+        _hp = (int)(transform.localScale.x) * 8 / 8;
+        _value = _hp / 10;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -31,7 +24,14 @@ public class PlanetLiving : MonoBehaviour
         {
             Debug.Log(_hp);
             Debug.Log("1");
-            _hp -= collision.gameObject.GetComponentInParent<RocketStats>().damage;
+            GameObject rocket = collision.gameObject.transform.parent.gameObject;
+            _hp -= rocket.GetComponent<RocketStats>().damage;
+            
+            if (_hp <= 0)
+            {
+                rocket.GetComponent<RocketStats>().owner.GetComponent<UserStats>().points += _value;
+                Destroy(gameObject.transform.parent.gameObject);
+            }
         }
     }
     
