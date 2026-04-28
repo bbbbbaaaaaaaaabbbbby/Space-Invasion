@@ -15,7 +15,7 @@ public class Shoot : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) &&  can_fire)
+        if (Input.GetKeyDown(KeyCode.Space) &&  can_fire)
         {
             StartCoroutine(ShootCoroutine());
         }

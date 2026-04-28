@@ -7,7 +7,9 @@ public class Controller : MonoBehaviour
     public float cursorPlaneDistance = 15f;
 
     public float forwardSpeed = 20f;
-    public float rotationSpeed = 5f;
+    public float rotationSpeed = 180f;          // Макс. скорость поворота (град/сек)
+    public float minRotationSpeed = 20f;        // Мин. скорость у центра экрана
+    public float rotationResponseSmoothing = 5f; // Плавность изменения скорости поворота
     public float maxBankAngle = 35f;
     public float bankSmoothness = 4f;
     public float minDistanceToCursor = 2f;
@@ -16,6 +18,7 @@ public class Controller : MonoBehaviour
     private Vector3 targetPoint;
     private float currentBankAngle;
     private Quaternion targetRotation;
+    private float rotationMultiplier = 1f; // Текущий множитель скорости (0..1)
 
     void Awake()
     {
@@ -25,6 +28,9 @@ public class Controller : MonoBehaviour
         rb.angularDamping = 2f;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+        var stats = GetComponent<UserStats>();
+        if (stats != null) forwardSpeed = stats.speed;
     }
 
     void Start()
@@ -48,26 +54,43 @@ public class Controller : MonoBehaviour
 
         if (dist < 0.001f) return;
 
+        direction.Normalize();
         if (dist < minDistanceToCursor)
-            direction = direction.normalized * minDistanceToCursor;
-        else
-            direction = direction.normalized;
+            direction *= minDistanceToCursor;
 
-        Quaternion lookRotation = Quaternion.LookRotation(direction, Vector3.up);
+        // 1. Защита от переворотов при вертикальном взгляде
+        Vector3 upRef = Vector3.up;
+        if (Mathf.Abs(Vector3.Dot(direction.normalized, Vector3.up)) > 0.95f)
+            upRef = transform.up;
 
-        Vector3 localDir = transform.InverseTransformDirection(direction);
-        float targetBank = -Mathf.Atan2(localDir.x, localDir.z) * Mathf.Rad2Deg * (maxBankAngle / 45f);
+        Quaternion lookRotation = Quaternion.LookRotation(direction.normalized, upRef);
+
+        // 2. Плавный крен через линейную проекцию
+        Vector3 localDir = transform.InverseTransformDirection(direction.normalized);
+        float targetBank = -localDir.x * maxBankAngle;
         targetBank = Mathf.Clamp(targetBank, -maxBankAngle, maxBankAngle);
-        currentBankAngle = Mathf.Lerp(currentBankAngle, targetBank, Time.deltaTime * bankSmoothness);
 
+        currentBankAngle = Mathf.Lerp(currentBankAngle, targetBank, Time.deltaTime * bankSmoothness);
         targetRotation = lookRotation * Quaternion.Euler(0, 0, currentBankAngle);
+
+        // 3. 🆕 Динамическая скорость поворота по удалению курсора от центра экрана
+        Vector2 screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+        float cursorDistFromCenter = Vector2.Distance(mousePos, screenCenter);
+        float maxPossibleDist = Mathf.Max(Screen.width, Screen.height) * 0.5f;
+
+        float centerFactor = Mathf.Clamp01(cursorDistFromCenter / maxPossibleDist);
+        // Сглаживаем множитель, чтобы скорость не дёргалась при резких движениях мыши
+        rotationMultiplier = Mathf.Lerp(rotationMultiplier, centerFactor, Time.deltaTime * rotationResponseSmoothing);
     }
 
     void FixedUpdate()
     {
         rb.MovePosition(rb.position + transform.forward * forwardSpeed * Time.fixedDeltaTime);
 
-        float maxAngleStep = rotationSpeed * 180f * Time.fixedDeltaTime;
+        // 🆕 Применяем динамическую скорость поворота
+        float dynamicRotationSpeed = Mathf.Lerp(minRotationSpeed, rotationSpeed, rotationMultiplier);
+        float maxAngleStep = dynamicRotationSpeed * Time.fixedDeltaTime;
+
         Quaternion smoothRotation = Quaternion.RotateTowards(rb.rotation, targetRotation, maxAngleStep);
         rb.MoveRotation(smoothRotation);
     }
