@@ -85,6 +85,7 @@ public class Controller : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (GetComponent<UserStats>().speed > 0)
         rb.MovePosition(rb.position + transform.forward * forwardSpeed * Time.fixedDeltaTime);
 
         // 🆕 Применяем динамическую скорость поворота

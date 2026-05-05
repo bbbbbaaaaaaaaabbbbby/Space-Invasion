@@ -18,5 +18,6 @@ public class Boom : MonoBehaviour
             Destroy(transform.parent.gameObject);
         }
         
+        
     }
 }
