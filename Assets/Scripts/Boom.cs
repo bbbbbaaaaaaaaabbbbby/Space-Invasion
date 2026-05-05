@@ -17,7 +17,13 @@ public class Boom : MonoBehaviour
             Destroy(explosionEffect, lifetime);
             Destroy(transform.parent.gameObject);
         }
-        
-        
+
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            explosionEffect = Instantiate(explosionPref,  transform.position, transform.rotation);
+            Destroy(explosionEffect, lifetime);
+            Destroy(collision.gameObject);
+            Destroy(transform.parent.gameObject);
+        }
     }
 }

@@ -183,6 +183,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlanetLiving
   _hp: 100
+  boomPrefab: {fileID: 0}
 --- !u!1 &3233855247321425889 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2d554fe8fd251c6488c6092bd11c9422, type: 3}
@@ -222,9 +223,10 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3233855247321425889}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8c28e2a478d103046a0689992dc427b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlanetLiving
   _hp: 100
+  boomPrefab: {fileID: 4341735504933213562, guid: 11a8c1b0acc4e4f4cbd1e9117f0fde2e, type: 3}
