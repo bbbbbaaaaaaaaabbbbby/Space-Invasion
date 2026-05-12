@@ -1,8 +1,10 @@
+using Mirror;
 using UnityEngine;
 
-public class RocketStats : MonoBehaviour
+public class RocketStats : NetworkBehaviour
 {
-    public GameObject owner;
-    public int damage = 50;
+    [SyncVar] public int damage = 50;
+    [SyncVar] public GameObject owner;
+
     public int speed = 100;
 }

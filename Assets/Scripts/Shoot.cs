@@ -11,14 +11,15 @@ public class Shoot : NetworkBehaviour
     public Transform firePoint;
     public Transform firePoint2;
 
+    [Header("Spawn Settings")]
+    public float spawnOffset = 3f; // ✅ Ракета спавнится ВПЕРЕДИ корабля
+
     [Header("Stats")]
     public float fire_rate = 0.2f;
 
     private bool can_fire = true;
     private UserStats userStats;
 
-    
-    
     void Start()
     {
         userStats = GetComponent<UserStats>();
@@ -28,12 +29,10 @@ public class Shoot : NetworkBehaviour
 
     void Update()
     {
-        // ✅ Только свой корабль стреляет по нажатию Space
         if (!isLocalPlayer) return;
 
         if (Input.GetKeyDown(KeyCode.Space) && can_fire)
         {
-            // Отправляем команду на сервер
             CmdShoot();
             StartCoroutine(ShootCooldown());
         }
@@ -46,24 +45,26 @@ public class Shoot : NetworkBehaviour
         can_fire = true;
     }
 
-    // ✅ Выполняется на сервере — все клиенты увидят ракеты
     [Command]
     void CmdShoot()
     {
+        // ✅ Спавним ВПЕРЕДИ точки огня, а не внутри корабля
+        Vector3 spawnPos1 = firePoint.position + firePoint.forward * spawnOffset;
+        Vector3 spawnPos2 = firePoint2.position + firePoint2.forward * spawnOffset;
+
         Quaternion rot = transform.rotation * Quaternion.Euler(0, 90, 0);
 
-        GameObject rocket1 = Instantiate(rocketPrefab, firePoint.position, rot);
-        GameObject rocket2 = Instantiate(rocketPrefab, firePoint2.position, rot);
+        GameObject rocket1 = Instantiate(rocketPrefab, spawnPos1, rot);
+        GameObject rocket2 = Instantiate(rocketPrefab, spawnPos2, rot);
 
-        // Спавним в сети
         NetworkServer.Spawn(rocket1);
         NetworkServer.Spawn(rocket2);
 
-        // Передаём параметры
+        // ✅ Передаём owner — ВАЖНО для игнорирования коллизии
         SetupRocket(rocket1);
         SetupRocket(rocket2);
 
-        // Автоудаление через 5 секунд
+        // Удаляем через 5 секунд
         StartCoroutine(DestroyLater(rocket1, 5f));
         StartCoroutine(DestroyLater(rocket2, 5f));
     }
@@ -73,7 +74,7 @@ public class Shoot : NetworkBehaviour
         RocketStats stats = rocket.GetComponent<RocketStats>();
         if (stats == null) return;
 
-        stats.owner = gameObject;
+        stats.owner = gameObject; // ✅ Кто выстрелил
         if (userStats != null)
             stats.damage = userStats.dmg;
     }

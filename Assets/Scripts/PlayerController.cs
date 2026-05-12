@@ -47,7 +47,7 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer || !canControl || !Application.isFocused) return;
 
         inputAxes.x = Input.GetAxisRaw("Horizontal"); // A/D ←/→
-        inputAxes.y = Input.GetAxisRaw("Vertical");   // W/S ↑/↓
+        inputAxes.y = -Input.GetAxisRaw("Vertical");   // W/S ↑/↓
 
         ProcessTurn(inputAxes);
 

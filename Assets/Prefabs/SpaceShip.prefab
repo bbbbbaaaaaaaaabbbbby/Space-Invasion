@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 2758789449891262558}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.679, y: 0.34, z: 6.58}
+  m_LocalPosition: {x: 1.679, y: 0.34, z: 8.32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 9038652166982146430}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.632, y: 0.334, z: 6.34}
+  m_LocalPosition: {x: -1.632, y: 0.334, z: 8.32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -359,6 +359,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4162518845885698735}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8562693780761494988}
     - targetCorrespondingSourceObject: {fileID: -6608382868759500256, guid: 82ab3f5a38597a84db2c656e23b2d915, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5795129868661875860}
@@ -451,6 +454,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4074287a4edb730448b19b23f54a0a83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Shoot
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   rocketPrefab: {fileID: 6696654689485054994, guid: 9d76434649b0b0843ba6be2d07bfe495, type: 3}
   firePoint: {fileID: 6046981382321289005}
   firePoint2: {fileID: 8327906655259435159}
@@ -623,6 +629,23 @@ MonoBehaviour:
   turnDecay: 5
   playerCameraPrefab: {fileID: 2138526299901390953, guid: 42534255b71975b459e245f5a1c1b10e, type: 3}
   spawnCameraOnStart: 1
+--- !u!114 &8562693780761494988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4546802691823468141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23f1ac83519b7a04388b3ac1041ede6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  maxHealth: 100
+  currentHealth: 0
 --- !u!1001 &8739491048164382024
 PrefabInstance:
   m_ObjectHideFlags: 0

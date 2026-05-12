@@ -1,3 +1,4 @@
+using System.Collections;
 using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +21,11 @@ public class GameFlowManager : MonoBehaviour
     [Header("Text (TMP)")]
     public TMP_Text statusText;
 
+    void Awake()
+    {
+        Application.runInBackground = true; // ✅ Игра работает даже без фокуса
+    }
+    
     void Start()
     {
         if (!ValidateUI()) return;
@@ -87,6 +93,34 @@ public class GameFlowManager : MonoBehaviour
     void OnJoin()
     {
         if (NetworkManager.singleton == null) return;
+
+        // ✅ Если предыдущее соединение "повисло" — убиваем его полностью
+        if (NetworkClient.isConnected || NetworkClient.isConnecting)
+        {
+            NetworkManager.singleton.StopClient();
+        }
+
+        // ✅ Принудительно очищаем "мертвый" транспорт
+        if (NetworkManager.singleton.transport != null)
+        {
+            NetworkManager.singleton.transport.Shutdown();
+        }
+
+        // Ждём 1 кадр и подключаемся заново
+        StartCoroutine(SafeConnect());
+    }
+
+    IEnumerator SafeConnect()
+    {
+        yield return null; // Ждём 1 кадр, чтобы Mirror всё очистил
+
+        // Проверяем ещё раз
+        if (NetworkManager.singleton.transport == null)
+        {
+            Debug.LogError("❌ Транспорт не назначен!");
+            yield break;
+        }
+
         NetworkManager.singleton.StartClient();
         GoToLobby();
     }
