@@ -8,6 +8,8 @@ public class GameFlowManager : MonoBehaviour
 {
     [Header("Network")]
     public NetworkGameState networkState;
+    public TMP_InputField ipInputField;   // Поле ввода IP
+    public TMP_InputField portInputField; // ✅ Поле ввода порта
 
     [Header("UI Panels")]
     public GameObject menuPanel;
@@ -21,11 +23,6 @@ public class GameFlowManager : MonoBehaviour
     [Header("Text (TMP)")]
     public TMP_Text statusText;
 
-    void Awake()
-    {
-        Application.runInBackground = true; // ✅ Игра работает даже без фокуса
-    }
-    
     void Start()
     {
         if (!ValidateUI()) return;
@@ -37,6 +34,13 @@ public class GameFlowManager : MonoBehaviour
         joinBtn.onClick.AddListener(OnJoin);
         startBtn.onClick.AddListener(HandleStart);
         
+        // Заполняем значения по умолчанию
+        if (ipInputField != null)
+            ipInputField.text = "localhost";
+        
+        if (portInputField != null)
+            portInputField.text = "7777";
+
         ResetUI();
 
         if (networkState != null)
@@ -85,43 +89,64 @@ public class GameFlowManager : MonoBehaviour
 
     void OnHost()
     {
-        if (NetworkManager.singleton == null) return;
+        if (NetworkManager.singleton == null)
+        {
+            Debug.LogError("❌ NetworkManager не найден!");
+            return;
+        }
+
+        // ✅ Применяем порт из поля ввода
+        ApplyPort();
+
         NetworkManager.singleton.StartHost();
         GoToLobby();
+        
+        var transport = Transport.active;
+        if (transport != null)
+            statusText.text = $"Хост: {NetworkManager.singleton.networkAddress}:{GetPort()}";
     }
 
     void OnJoin()
     {
-        if (NetworkManager.singleton == null) return;
+        if (NetworkManager.singleton == null)
+        {
+            Debug.LogError("❌ NetworkManager не найден!");
+            return;
+        }
 
-        // ✅ Если предыдущее соединение "повисло" — убиваем его полностью
+        // ✅ Берём IP и порт из полей ввода
+        string ip = (ipInputField != null && !string.IsNullOrEmpty(ipInputField.text)) 
+            ? ipInputField.text 
+            : "localhost";
+
+        NetworkManager.singleton.networkAddress = ip;
+        ApplyPort();
+
         if (NetworkClient.isConnected || NetworkClient.isConnecting)
         {
             NetworkManager.singleton.StopClient();
         }
 
-        // ✅ Принудительно очищаем "мертвый" транспорт
-        if (NetworkManager.singleton.transport != null)
-        {
-            NetworkManager.singleton.transport.Shutdown();
-        }
-
-        // Ждём 1 кадр и подключаемся заново
         StartCoroutine(SafeConnect());
     }
 
     IEnumerator SafeConnect()
     {
-        yield return null; // Ждём 1 кадр, чтобы Mirror всё очистил
+        yield return null;
 
-        // Проверяем ещё раз
-        if (NetworkManager.singleton.transport == null)
+        if (NetworkManager.singleton == null) yield break;
+
+        try
         {
-            Debug.LogError("❌ Транспорт не назначен!");
+            NetworkManager.singleton.StartClient();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"❌ Ошибка подключения: {ex.Message}");
+            statusText.text = "Ошибка подключения!";
             yield break;
         }
 
-        NetworkManager.singleton.StartClient();
         GoToLobby();
     }
 
@@ -131,6 +156,45 @@ public class GameFlowManager : MonoBehaviour
         {
             networkState.StartGame();
         }
+    }
+
+    // ✅ Применяет порт из поля ввода к транспорту
+    void ApplyPort()
+    {
+        if (portInputField == null) return;
+        
+        if (ushort.TryParse(portInputField.text, out ushort port))
+        {
+            var transport = Transport.active;
+            
+            if (transport is TelepathyTransport telepathy)
+                telepathy.port = port;
+            else if (transport is kcp2k.KcpTransport kcp)
+                kcp.Port = port;
+            else if (transport is Mirror.SimpleWeb.SimpleWebTransport swt)
+                swt.port = port;
+            
+            Debug.Log($"🔌 Порт установлен: {port}");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Неверный порт, используется 7777");
+        }
+    }
+
+    // ✅ Получает текущий порт из транспорта
+    ushort GetPort()
+    {
+        var transport = Transport.active;
+        
+        if (transport is TelepathyTransport telepathy)
+            return telepathy.port;
+        else if (transport is kcp2k.KcpTransport kcp)
+            return kcp.Port;
+        else if (transport is Mirror.SimpleWeb.SimpleWebTransport swt)
+            return swt.port;
+        
+        return 7777;
     }
 
     void GoToLobby()
@@ -146,19 +210,32 @@ public class GameFlowManager : MonoBehaviour
         lobbyPanel.SetActive(false);
         Time.timeScale = 0f;
         startBtn.interactable = false;
-        statusText.text = "Подключение: 0/2";
+        statusText.text = "Введите IP:Порт и нажмите Join";
     }
 
     void EnableLocalPlayer()
     {
-        // ✅ ИСПРАВЛЕНО: Ищем ВСЕХ PlayerController и включаем локального
-        var players = FindObjectsOfType<PlayerController>();
-        foreach (var pc in players)
+        // ✅ Исправлено: ищем через NetworkClient, а не случайный FindObjectOfType
+        if (NetworkClient.localPlayer != null)
+        {
+            var pc = NetworkClient.localPlayer.GetComponent<PlayerController>();
+            if (pc != null)
+            {
+                pc.EnableControl();
+                Debug.Log("🎮 Управление включено для локального игрока (хост/клиент)");
+                return;
+            }
+        }
+
+        // Fallback: если по какой-то причине localPlayer не найден
+        var allPlayers = FindObjectsOfType<PlayerController>();
+        foreach (var pc in allPlayers)
         {
             if (pc.isLocalPlayer)
             {
                 pc.EnableControl();
-                Debug.Log("🎮 [GFM] Управление включено для локального игрока");
+                Debug.Log("🎮 Управление включено (fallback)");
+                break;
             }
         }
     }
