@@ -3,25 +3,32 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameFlowManager : MonoBehaviour
 {
     [Header("Network")]
     public NetworkGameState networkState;
-    public TMP_InputField ipInputField;   // Поле ввода IP
-    public TMP_InputField portInputField; // ✅ Поле ввода порта
+    public TMP_InputField ipInputField;
+    public TMP_InputField portInputField;
 
     [Header("UI Panels")]
     public GameObject menuPanel;
     public GameObject lobbyPanel;
+    public GameObject playerDisconnectedPanel; // ✅ "Противник вышел — победа"
+    public GameObject hostDisconnectedPanel;   // ✅ "Хост отключился"
 
     [Header("Buttons")]
     public Button hostBtn;
     public Button joinBtn;
     public Button startBtn;
+    public Button playerDisconnectBtn; // Кнопка "В меню" на панели победы
+    public Button hostDisconnectBtn;   // Кнопка "В меню" на панели хоста
 
     [Header("Text (TMP)")]
     public TMP_Text statusText;
+
+    private bool wasConnected = false;
 
     void Start()
     {
@@ -33,13 +40,11 @@ public class GameFlowManager : MonoBehaviour
         hostBtn.onClick.AddListener(OnHost);
         joinBtn.onClick.AddListener(OnJoin);
         startBtn.onClick.AddListener(HandleStart);
+        playerDisconnectBtn?.onClick.AddListener(ReturnToMenu);
+        hostDisconnectBtn?.onClick.AddListener(ReturnToMenu);
         
-        // Заполняем значения по умолчанию
-        if (ipInputField != null)
-            ipInputField.text = "localhost";
-        
-        if (portInputField != null)
-            portInputField.text = "7777";
+        if (ipInputField != null) ipInputField.text = "localhost";
+        if (portInputField != null) portInputField.text = "7777";
 
         ResetUI();
 
@@ -61,6 +66,8 @@ public class GameFlowManager : MonoBehaviour
 
     void Update()
     {
+        CheckConnection();
+
         if (networkState == null) return;
         if (networkState.gameStarted) return;
         if (!NetworkServer.active) return;
@@ -73,19 +80,91 @@ public class GameFlowManager : MonoBehaviour
         }
     }
 
-    void OnPlayerCountUpdated(int count)
+    // =================== ПРОВЕРКА СОЕДИНЕНИЯ ===================
+
+    void CheckConnection()
     {
-        statusText.text = $"Игроков: {count}/2";
+        // Был подключён, но соединение пропало
+        if (wasConnected && !NetworkClient.isConnected && !NetworkClient.isConnecting)
+        {
+            wasConnected = false;
+            
+            // Определяем: я хост или клиент?
+            if (NetworkServer.active)
+            {
+                // Я хост — значит клиент отключился
+                OnPlayerDisconnected();
+            }
+            else
+            {
+                // Я клиент — значит хост упал
+                OnHostDisconnected();
+            }
+        }
+
+        if (NetworkClient.isConnected)
+            wasConnected = true;
     }
 
-    void OnGameStarted()
+    // =================== ОТКЛЮЧЕНИЕ ИГРОКА (хост видит) ===================
+
+    void OnPlayerDisconnected()
+    {
+        Debug.Log("👤 Противник вышел!");
+        
+        Time.timeScale = 0f;
+        
+        menuPanel?.SetActive(false);
+        lobbyPanel?.SetActive(false);
+        hostDisconnectedPanel?.SetActive(false);
+        playerDisconnectedPanel?.SetActive(true);
+        
+        statusText.text = "Противник вышел — победа!";
+    }
+
+    // =================== ОТКЛЮЧЕНИЕ ХОСТА (клиент видит) ===================
+
+    void OnHostDisconnected()
+    {
+        Debug.Log("❌ Хост отключился!");
+        
+        if (NetworkManager.singleton != null)
+            NetworkManager.singleton.StopClient();
+
+        Time.timeScale = 0f;
+        
+        menuPanel?.SetActive(false);
+        lobbyPanel?.SetActive(false);
+        playerDisconnectedPanel?.SetActive(false);
+        hostDisconnectedPanel?.SetActive(true);
+        
+        statusText.text = "Хост отключился";
+    }
+
+    // =================== ВОЗВРАТ В МЕНЮ ===================
+
+    public void ReturnToMenu()
     {
         Time.timeScale = 1f;
-        menuPanel.SetActive(false);
-        lobbyPanel.SetActive(false);
-        EnableLocalPlayer();
-        Debug.Log("✅ Матч начался!");
+
+        if (NetworkManager.singleton != null)
+        {
+            if (NetworkServer.active)
+                NetworkManager.singleton.StopHost();
+            else
+                NetworkManager.singleton.StopClient();
+        }
+
+        StartCoroutine(LoadMenuScene());
     }
+
+    IEnumerator LoadMenuScene()
+    {
+        yield return null;
+        SceneManager.LoadScene(0);
+    }
+
+    // =================== ОСТАЛЬНОЕ ===================
 
     void OnHost()
     {
@@ -95,9 +174,7 @@ public class GameFlowManager : MonoBehaviour
             return;
         }
 
-        // ✅ Применяем порт из поля ввода
         ApplyPort();
-
         NetworkManager.singleton.StartHost();
         GoToLobby();
         
@@ -114,7 +191,6 @@ public class GameFlowManager : MonoBehaviour
             return;
         }
 
-        // ✅ Берём IP и порт из полей ввода
         string ip = (ipInputField != null && !string.IsNullOrEmpty(ipInputField.text)) 
             ? ipInputField.text 
             : "localhost";
@@ -123,9 +199,7 @@ public class GameFlowManager : MonoBehaviour
         ApplyPort();
 
         if (NetworkClient.isConnected || NetworkClient.isConnecting)
-        {
             NetworkManager.singleton.StopClient();
-        }
 
         StartCoroutine(SafeConnect());
     }
@@ -153,12 +227,64 @@ public class GameFlowManager : MonoBehaviour
     void HandleStart()
     {
         if (networkState != null && NetworkServer.active)
-        {
             networkState.StartGame();
+    }
+
+    void OnGameStarted()
+    {
+        Time.timeScale = 1f;
+        menuPanel.SetActive(false);
+        lobbyPanel.SetActive(false);
+        EnableLocalPlayer();
+        Debug.Log("✅ Матч начался!");
+    }
+
+    void OnPlayerCountUpdated(int count)
+    {
+        statusText.text = $"Игроков: {count}/2";
+    }
+
+    void GoToLobby()
+    {
+        menuPanel.SetActive(false);
+        lobbyPanel.SetActive(true);
+        statusText.text = "Ожидание игроков...";
+    }
+
+    void ResetUI()
+    {
+        menuPanel.SetActive(true);
+        lobbyPanel.SetActive(false);
+        playerDisconnectedPanel?.SetActive(false);
+        hostDisconnectedPanel?.SetActive(false);
+        Time.timeScale = 0f;
+        startBtn.interactable = false;
+        statusText.text = "Введите IP:Порт и нажмите Join";
+    }
+
+    void EnableLocalPlayer()
+    {
+        if (NetworkClient.localPlayer != null)
+        {
+            var pc = NetworkClient.localPlayer.GetComponent<PlayerController>();
+            if (pc != null)
+            {
+                pc.EnableControl();
+                return;
+            }
+        }
+
+        var allPlayers = FindObjectsOfType<PlayerController>();
+        foreach (var pc in allPlayers)
+        {
+            if (pc.isLocalPlayer)
+            {
+                pc.EnableControl();
+                break;
+            }
         }
     }
 
-    // ✅ Применяет порт из поля ввода к транспорту
     void ApplyPort()
     {
         if (portInputField == null) return;
@@ -173,16 +299,9 @@ public class GameFlowManager : MonoBehaviour
                 kcp.Port = port;
             else if (transport is Mirror.SimpleWeb.SimpleWebTransport swt)
                 swt.port = port;
-            
-            Debug.Log($"🔌 Порт установлен: {port}");
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ Неверный порт, используется 7777");
         }
     }
 
-    // ✅ Получает текущий порт из транспорта
     ushort GetPort()
     {
         var transport = Transport.active;
@@ -197,53 +316,24 @@ public class GameFlowManager : MonoBehaviour
         return 7777;
     }
 
-    void GoToLobby()
-    {
-        menuPanel.SetActive(false);
-        lobbyPanel.SetActive(true);
-        statusText.text = "Ожидание игроков...";
-    }
-
-    void ResetUI()
-    {
-        menuPanel.SetActive(true);
-        lobbyPanel.SetActive(false);
-        Time.timeScale = 0f;
-        startBtn.interactable = false;
-        statusText.text = "Введите IP:Порт и нажмите Join";
-    }
-
-    void EnableLocalPlayer()
-    {
-        // ✅ Исправлено: ищем через NetworkClient, а не случайный FindObjectOfType
-        if (NetworkClient.localPlayer != null)
-        {
-            var pc = NetworkClient.localPlayer.GetComponent<PlayerController>();
-            if (pc != null)
-            {
-                pc.EnableControl();
-                Debug.Log("🎮 Управление включено для локального игрока (хост/клиент)");
-                return;
-            }
-        }
-
-        // Fallback: если по какой-то причине localPlayer не найден
-        var allPlayers = FindObjectsOfType<PlayerController>();
-        foreach (var pc in allPlayers)
-        {
-            if (pc.isLocalPlayer)
-            {
-                pc.EnableControl();
-                Debug.Log("🎮 Управление включено (fallback)");
-                break;
-            }
-        }
-    }
-
     bool ValidateUI()
     {
         bool ok = menuPanel && lobbyPanel && statusText && hostBtn && joinBtn && startBtn;
         if (!ok) Debug.LogError("❌ GameFlowManager: Проверь привязки UI в Inspector!");
         return ok;
+    }
+    
+    public void ShowPlayerDisconnectedPanel()
+    {
+        Debug.Log("👤 Противник вышел");
+    
+        Time.timeScale = 0f;
+    
+        menuPanel?.SetActive(false);
+        lobbyPanel?.SetActive(false);
+        hostDisconnectedPanel?.SetActive(false);
+        playerDisconnectedPanel?.SetActive(true);
+    
+        statusText.text = "Противник вышел";
     }
 }

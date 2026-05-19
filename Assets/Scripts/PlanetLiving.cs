@@ -8,8 +8,8 @@ public class PlanetLiving : MonoBehaviour
 
     private void Awake()
     {
-        _hp = (int)(transform.localScale.x) * 8 / 8;
-        _value = _hp / 10;
+        _hp = (int)(transform.localScale.x) * 8;
+        _value = _hp / 20;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -18,7 +18,7 @@ public class PlanetLiving : MonoBehaviour
         Debug.Log(collision.gameObject.tag);
         if (collision.gameObject.CompareTag("Player"))
         {
-            Destroy(collision.gameObject);
+            collision.gameObject.GetComponent<PlayerHealth>().TakeDamage(200, gameObject);
         }
         if (collision.gameObject.CompareTag("Rocket"))
         {

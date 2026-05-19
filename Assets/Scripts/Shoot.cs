@@ -19,6 +19,7 @@ public class Shoot : NetworkBehaviour
 
     private bool can_fire = true;
     private UserStats userStats;
+    public KeyCode shootButton;
 
     void Start()
     {
@@ -27,11 +28,16 @@ public class Shoot : NetworkBehaviour
             fire_rate = userStats.fire_rate;
     }
 
+    void FixedUpdate()
+    {
+        shootButton = GetComponent<UserStats>().shootButton;
+    }
+
     void Update()
     {
         if (!isLocalPlayer) return;
 
-        if (Input.GetKeyDown(KeyCode.Space) && can_fire)
+        if (Input.GetKeyDown(shootButton) && can_fire)
         {
             CmdShoot();
             StartCoroutine(ShootCooldown());

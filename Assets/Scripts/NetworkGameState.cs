@@ -35,17 +35,46 @@ public class NetworkGameState : NetworkBehaviour
     {
         playerCount = count;
     }
-    
-    public override void OnStartLocalPlayer()
+
+    // =================== КОНЕЦ ИГРЫ ===================
+
+    [Server]
+    public void AnnounceLoser(NetworkConnectionToClient loserConn)
     {
-        base.OnStartLocalPlayer();
-    
-        // Если игра уже началась — сразу включаем управление
-        var gameState = FindObjectOfType<NetworkGameState>();
-        if (gameState != null && gameState.gameStarted)
+        // Проигравшему — поражение
+        TargetShowLose(loserConn);
+
+        // Победителю — победа
+        foreach (var conn in NetworkServer.connections.Values)
         {
-            var pc = GetComponent<PlayerController>();
-            if (pc != null) pc.EnableControl();
+            if (conn != loserConn && conn.isReady)
+            {
+                TargetShowWin(conn);
+            }
         }
+    }
+
+    [Server]
+    public void AnnounceWinnerByDisconnect(NetworkConnectionToClient disconnectedConn)
+    {
+        foreach (var conn in NetworkServer.connections.Values)
+        {
+            if (conn != disconnectedConn && conn.isReady)
+            {
+                TargetShowWin(conn);
+            }
+        }
+    }
+
+    [TargetRpc]
+    void TargetShowLose(NetworkConnection target)
+    {
+        GameUIManager.Instance?.ShowLose();
+    }
+
+    [TargetRpc]
+    void TargetShowWin(NetworkConnection target)
+    {
+        GameUIManager.Instance?.ShowWin();
     }
 }

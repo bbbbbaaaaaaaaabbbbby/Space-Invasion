@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8018157393234253486}
   m_Layer: 0
   m_Name: Player_Camera
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -99,6 +99,9 @@ MonoBehaviour:
   target: {fileID: 0}
   offset: {x: 0, y: 8, z: -12}
   useLocalOffset: 1
+  stiffness: 0.9
+  instantPosition: 0
+  instantRotation: 0
   positionSmooth: 2
   rotationSmooth: 2
   lookAhead: 2

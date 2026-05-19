@@ -20,7 +20,7 @@ public class GameUIManager : MonoBehaviour
         // hudPanel?.SetActive(true);
     }
 
-    public void ShowWinPanel()
+    public void ShowWin()
     {
         Debug.Log("Win Panel");
         HideAllPanels();
@@ -28,7 +28,7 @@ public class GameUIManager : MonoBehaviour
         Time.timeScale = 0f; // Останавливаем игру
     }
 
-    public void ShowLosePanel()
+    public void ShowLose()
     {
         Debug.Log("Lose Panel");
         HideAllPanels();

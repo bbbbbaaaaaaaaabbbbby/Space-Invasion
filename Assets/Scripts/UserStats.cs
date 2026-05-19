@@ -11,6 +11,7 @@ public class UserStats : MonoBehaviour
     public int dmg = 50;
     public int maneuverability;
     public TMP_Text points_text;
+    public KeyCode shootButton =  KeyCode.Space;
 
     private void Start()
     {
